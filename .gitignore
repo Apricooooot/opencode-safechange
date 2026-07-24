@@ -1,0 +1,7 @@
+node_modules/
+.opencode/node_modules/
+.safechange/
+coverage/
+dist/
+.env
+

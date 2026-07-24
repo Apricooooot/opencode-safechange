@@ -1,0 +1,23 @@
+{
+  "name": "opencode-safechange",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A risk-aware code migration agent runtime for OpenCode",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check runtime/state-machine.js && node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "opencode",
+    "agent",
+    "multi-agent",
+    "code-migration",
+    "developer-tools"
+  ],
+  "license": "MIT"
+}
+
