@@ -1,0 +1,11 @@
+{
+  "name": "release-sync-service",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.12"
+  }
+}

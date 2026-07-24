@@ -1,4 +1,7 @@
 param(
+  [ValidatePattern('^[a-z0-9][a-z0-9._-]*$')]
+  [string]$Task = 'config-api-options-v1',
+
   [Parameter(Mandatory = $true)]
   [ValidatePattern('^[a-z0-9._-]+/[a-zA-Z0-9._-]+$')]
   [string]$Model,
@@ -10,7 +13,6 @@ param(
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $workspaceRoot = Split-Path -Parent (Split-Path -Parent $repositoryRoot)
-$runDirectory = Join-Path $workspaceRoot 'work\opencode-safechange-benchmark\config-api-options-v1'
 $resultsDirectory = Join-Path $repositoryRoot '.benchmark-runs\results'
 
 $openCode = Get-Command 'opencode.cmd' -ErrorAction SilentlyContinue
@@ -27,7 +29,8 @@ if ($authExitCode -ne 0 -or $authOutput -match '0 credentials') {
   throw 'OpenCode has no configured provider. Run opencode.cmd and use /connect.'
 }
 
-& node (Join-Path $PSScriptRoot 'prepare-run.js')
+$runDirectory = (& node (Join-Path $PSScriptRoot 'prepare-run.js') $Task |
+  Out-String).Trim()
 if ($LASTEXITCODE -ne 0) {
   throw 'Failed to prepare the isolated benchmark worktree.'
 }
@@ -49,7 +52,7 @@ $gitCommit = (& git -C $repositoryRoot rev-parse HEAD | Out-String).Trim()
 
 $metadata = [ordered]@{
   schemaVersion = 1
-  taskId = 'config-api-options-v1'
+  taskId = $Task
   startedAt = (Get-Date).ToUniversalTime().ToString('o')
   openCodeVersion = $openCodeVersion
   provider = $Model.Split('/')[0]

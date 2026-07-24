@@ -182,6 +182,7 @@ For a real OpenCode run that cannot see the answer key:
 ```powershell
 npm.cmd run benchmark:prepare
 powershell -ExecutionPolicy Bypass -File benchmark/run-opencode.ps1 `
+  -Task node-fetch-esm-v3 `
   -Model openai/gpt-5.6-sol -Variant high
 ```
 

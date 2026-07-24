@@ -13,6 +13,15 @@ const sample = JSON.parse(
     "utf8",
   ),
 )
+const dependencyTask = JSON.parse(
+  await readFile(
+    new URL(
+      "../benchmark/tasks/node-fetch-esm-v3.json",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+)
 
 test("complete evidence-backed prediction earns a perfect score", () => {
   const result = evaluate(task, sample)
@@ -68,4 +77,23 @@ test("invalid and duplicate findings are rejected", () => {
       }),
     /duplicate finding/,
   )
+})
+
+test("dependency-upgrade task spans runtime and operational surfaces", () => {
+  const prediction = {
+    taskId: dependencyTask.id,
+    findings: dependencyTask.expectedImpact.map(
+      ({ file, classification, reason }) => ({
+        file,
+        classification,
+        evidence: reason,
+      }),
+    ),
+  }
+
+  const result = evaluate(dependencyTask, prediction)
+
+  assert.equal(result.metrics.overall, 1)
+  assert.equal(result.counts.expected, 8)
+  assert.deepEqual(result.missedFiles, [])
 })
