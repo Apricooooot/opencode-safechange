@@ -68,6 +68,30 @@ Git by default.
 
 More prompts are available in [`examples/`](examples/).
 
+## Reproducible benchmark
+
+The repository includes a small but cross-layer JavaScript fixture. Its task is
+to replace a path-only configuration API with an options object while preserving
+compatibility. The expected impact surface includes production callers, tests,
+documentation, and an indirect cache-key dependency.
+
+Score a SafeChange prediction with:
+
+```bash
+npm run benchmark
+```
+
+To evaluate an agent run, save its findings in the same format as
+[`benchmark/sample-prediction.json`](benchmark/sample-prediction.json), then run:
+
+```bash
+node benchmark/evaluate.js path/to/prediction.json
+```
+
+The evaluator reports precision, recall, F1, classification accuracy, evidence
+coverage, and a weighted overall score. See
+[`benchmark/README.md`](benchmark/README.md) for the protocol.
+
 ## Lifecycle
 
 ```text
@@ -97,8 +121,8 @@ Version 0.1 is intentionally small:
 - machine-readable reports;
 - explicit lifecycle tests.
 
-Planned work includes benchmark fixtures, report schema validation, a GitHub
-Actions integration, and cross-run evaluation metrics.
+Planned work includes additional language fixtures, report schema validation, a
+GitHub Actions integration, and cross-model evaluation results.
 
 ## Safety
 

@@ -6,7 +6,8 @@
   "description": "A risk-aware code migration agent runtime for OpenCode",
   "scripts": {
     "test": "node --test",
-    "check": "node --check runtime/state-machine.js && node --test"
+    "benchmark": "node benchmark/evaluate.js benchmark/sample-prediction.json",
+    "check": "node --check runtime/state-machine.js && node --check benchmark/evaluate.js && node --test"
   },
   "engines": {
     "node": ">=20"
@@ -20,4 +21,3 @@
   ],
   "license": "MIT"
 }
-

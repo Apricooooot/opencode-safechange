@@ -1,0 +1,41 @@
+{
+  "taskId": "config-api-options-v1",
+  "findings": [
+    {
+      "file": "src/config.js",
+      "classification": "direct",
+      "evidence": "Exports parseConfig(path) and reads the file."
+    },
+    {
+      "file": "src/server.js",
+      "classification": "direct",
+      "evidence": "Passes options.configPath as a string."
+    },
+    {
+      "file": "src/cli.js",
+      "classification": "direct",
+      "evidence": "Passes argv[2] directly to parseConfig."
+    },
+    {
+      "file": "src/cache.js",
+      "classification": "indirect",
+      "evidence": "Uses the string path as the complete cache identity."
+    },
+    {
+      "file": "test/config.test.js",
+      "classification": "validation",
+      "evidence": "Tests the existing string signature."
+    },
+    {
+      "file": "test/server.test.js",
+      "classification": "validation",
+      "evidence": "Covers the server integration."
+    },
+    {
+      "file": "docs/configuration.md",
+      "classification": "indirect",
+      "evidence": "Shows parseConfig with a string argument."
+    }
+  ]
+}
+
