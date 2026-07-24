@@ -27,10 +27,24 @@ test("runner records reproducibility metadata without credentials", async () => 
   assert.match(source, /variant/)
   assert.match(source, /authExitCode/)
   assert.match(source, /runExitCode/)
+  assert.match(source, /taskId = \$Task/)
+  assert.match(source, /prepare-run\.js'\) \$Task/)
   assert.match(source, /prediction\.json/)
   assert.match(source, /evaluate\.js/)
   assert.match(source, /git -C \$runDirectory init/)
   assert.doesNotMatch(source, /auth\.json/)
+})
+
+test("preparation selects a task without copying its answer key", async () => {
+  const source = await readFile(
+    new URL("../benchmark/prepare-run.js", import.meta.url),
+    "utf8",
+  )
+
+  assert.match(source, /requestedTaskId/)
+  assert.match(source, /tasks/)
+  assert.match(source, /task\.fixture/)
+  assert.doesNotMatch(source, /task\.expectedImpact/)
 })
 
 test("primary agent cannot edit and only permits read-only Git commands", async () => {

@@ -5,10 +5,10 @@
   "type": "module",
   "description": "A risk-aware code migration agent runtime for OpenCode",
   "scripts": {
-    "test": "node --test",
+    "test": "node --test test/benchmark.test.js test/prepare-run.test.js test/state-machine.test.js",
     "benchmark": "node benchmark/evaluate.js benchmark/sample-prediction.json",
     "benchmark:prepare": "node benchmark/prepare-run.js",
-    "check": "node --check runtime/state-machine.js && node --check benchmark/evaluate.js && node --test"
+    "check": "node --check runtime/state-machine.js && node --check benchmark/evaluate.js && npm test"
   },
   "engines": {
     "node": ">=20"

@@ -7,9 +7,20 @@ import { fileURLToPath } from "node:url"
 const benchmarkDirectory = dirname(fileURLToPath(import.meta.url))
 const repositoryRoot = resolve(benchmarkDirectory, "..")
 const workspaceRoot = resolve(repositoryRoot, "..", "..")
+const requestedTaskId = process.argv[2] ?? "config-api-options-v1"
+if (!/^[a-z0-9][a-z0-9._-]*$/.test(requestedTaskId)) {
+  throw new Error(`invalid task id "${requestedTaskId}"`)
+}
+const taskPath =
+  requestedTaskId === "config-api-options-v1"
+    ? join(benchmarkDirectory, "task.json")
+    : join(benchmarkDirectory, "tasks", `${requestedTaskId}.json`)
 const task = JSON.parse(
-  await readFile(join(benchmarkDirectory, "task.json"), "utf8"),
+  await readFile(taskPath, "utf8"),
 )
+if (task.id !== requestedTaskId) {
+  throw new Error(`task id "${task.id}" does not match "${requestedTaskId}"`)
+}
 const runsRoot = join(workspaceRoot, "work", "opencode-safechange-benchmark")
 const runDirectory = join(runsRoot, task.id)
 

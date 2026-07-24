@@ -1,0 +1,47 @@
+{
+  "id": "node-fetch-esm-v3",
+  "fixture": "fixtures/node-fetch-esm-v3",
+  "prompt": "Analyze upgrading node-fetch from v2 to v3 in this CommonJS service. node-fetch v3 is ESM-only. Find every affected production file, indirect behavioral dependency, test, generated dependency artifact, CI/runtime constraint, deployment file, and documentation file. Produce a bounded migration plan that preserves current request and error behavior. Do not edit files.",
+  "expectedImpact": [
+    {
+      "file": "package.json",
+      "classification": "direct",
+      "reason": "Declares node-fetch v2 and a CommonJS package."
+    },
+    {
+      "file": "package-lock.json",
+      "classification": "direct",
+      "reason": "Generated dependency artifact pins node-fetch v2."
+    },
+    {
+      "file": "src/github-client.js",
+      "classification": "direct",
+      "reason": "Requires node-fetch synchronously at module load."
+    },
+    {
+      "file": "src/sync-releases.js",
+      "classification": "indirect",
+      "reason": "Consumes the wrapper and depends on its rejection and return behavior."
+    },
+    {
+      "file": "test/github-client.test.js",
+      "classification": "validation",
+      "reason": "Mocks the CommonJS node-fetch module and asserts error behavior."
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "classification": "validation",
+      "reason": "Pins the Node version used to validate the dependency migration."
+    },
+    {
+      "file": "Dockerfile",
+      "classification": "indirect",
+      "reason": "Pins the production Node runtime and npm install path."
+    },
+    {
+      "file": "docs/github-integration.md",
+      "classification": "indirect",
+      "reason": "Documents the current CommonJS integration and supported runtime."
+    }
+  ]
+}

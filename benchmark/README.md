@@ -1,12 +1,18 @@
 # SafeChange benchmark
 
 This benchmark evaluates impact discovery rather than code-generation style.
-The first fixture models a public API migration that crosses runtime code, tests,
-documentation, and an indirect behavioral dependency.
+Its fixtures cover different migration families so results do not depend on one
+repository shape or change type.
 
-## Task
+## Tasks
 
-The fixture application exposes:
+- `config-api-options-v1` changes a public configuration API across runtime
+  code, tests, documentation, and an indirect cache dependency.
+- `node-fetch-esm-v3` upgrades an ESM-only dependency inside a CommonJS
+  service, crossing production imports, a wrapper consumer, tests, lockfiles,
+  CI, container runtime, and documentation.
+
+The first fixture exposes:
 
 ```js
 parseConfig(path)
@@ -27,22 +33,26 @@ Prepare an isolated run directory:
 
 ```bash
 npm run benchmark:prepare
+node benchmark/prepare-run.js node-fetch-esm-v3
 ```
 
-This creates `work/opencode-safechange-benchmark/config-api-options-v1/` beside
-the repository's `outputs/` directory. The location is outside the source
-repository's parent Git worktree and contains only the fixture, SafeChange
-runtime configuration, and a prompt file. It intentionally does not copy
-`task.json`, `sample-prediction.json`, the evaluator, or any answer key into the
-agent's worktree.
+This creates `work/opencode-safechange-benchmark/<task-id>/` beside the
+repository's `outputs/` directory. The location is outside the source
+repository's parent Git worktree and contains only the selected fixture,
+SafeChange runtime configuration, and a prompt file. It intentionally does not
+copy task metadata, sample predictions, the evaluator, or any answer key into
+the agent's worktree.
 
 On Windows, run the end-to-end command:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File benchmark/run-opencode.ps1 `
+  -Task node-fetch-esm-v3 `
   -Model openai/gpt-5.6-sol `
   -Variant high
 ```
+
+Omit `-Task` to run the default `config-api-options-v1` fixture.
 
 The script verifies that OpenCode is authenticated, rebuilds and initializes the
 isolated directory as its own Git worktree, and stores raw JSON events under the
@@ -74,6 +84,17 @@ Paths are relative to the fixture root and use `/` separators.
 A successful run prints paths for the raw events, reproducibility metadata,
 normalized prediction, and evaluator score. Model output and evidence should
 still be reviewed alongside the numeric score.
+
+## Published results
+
+| Task | Model / variant | Precision | Recall | F1 | Overall |
+|---|---|---:|---:|---:|---:|
+| `config-api-options-v1` | GPT-5.6 Sol / high | 0.875 | 1.000 | 0.933 | 0.924 |
+| `node-fetch-esm-v3` | GPT-5.6 Sol / high | 1.000 | 1.000 | 1.000 | 0.925 |
+
+The dependency-upgrade run found all eight expected files with no false
+positives. Its remaining score difference came from two classification-boundary
+disagreements, not missed impact surfaces.
 
 ## Score
 

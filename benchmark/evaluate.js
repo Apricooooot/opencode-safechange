@@ -5,7 +5,12 @@ import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const benchmarkDirectory = dirname(fileURLToPath(import.meta.url))
-const taskPath = resolve(benchmarkDirectory, "task.json")
+
+function taskPathFor(taskId) {
+  return taskId === "config-api-options-v1"
+    ? resolve(benchmarkDirectory, "task.json")
+    : resolve(benchmarkDirectory, "tasks", `${taskId}.json`)
+}
 
 function round(value) {
   return Math.round(value * 1000) / 1000
@@ -116,10 +121,15 @@ async function main() {
   }
 
   try {
-    const [task, prediction] = await Promise.all([
-      readFile(taskPath, "utf8").then(JSON.parse),
-      readFile(resolve(predictionPath), "utf8").then(JSON.parse),
-    ])
+    const prediction = await readFile(resolve(predictionPath), "utf8").then(
+      JSON.parse,
+    )
+    if (!/^[a-z0-9][a-z0-9._-]*$/.test(prediction.taskId ?? "")) {
+      throw new TypeError("prediction taskId is invalid")
+    }
+    const task = await readFile(taskPathFor(prediction.taskId), "utf8").then(
+      JSON.parse,
+    )
     const result = evaluate(task, prediction)
     console.log(JSON.stringify(result, null, 2))
     if (minimum !== null && result.metrics.overall < minimum) {
@@ -133,4 +143,3 @@ async function main() {
 if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
   await main()
 }
-
