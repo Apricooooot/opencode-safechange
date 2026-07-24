@@ -85,6 +85,17 @@ A successful run prints paths for the raw events, reproducibility metadata,
 normalized prediction, and evaluator score. Model output and evidence should
 still be reviewed alongside the numeric score.
 
+## Published results
+
+| Task | Model / variant | Precision | Recall | F1 | Overall |
+|---|---|---:|---:|---:|---:|
+| `config-api-options-v1` | GPT-5.6 Sol / high | 0.875 | 1.000 | 0.933 | 0.924 |
+| `node-fetch-esm-v3` | GPT-5.6 Sol / high | 1.000 | 1.000 | 1.000 | 0.925 |
+
+The dependency-upgrade run found all eight expected files with no false
+positives. Its remaining score difference came from two classification-boundary
+disagreements, not missed impact surfaces.
+
 ## Score
 
 ```bash

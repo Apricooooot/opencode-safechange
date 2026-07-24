@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "taskId": "node-fetch-esm-v3",
+  "startedAt": "2026-07-24T22:54:14.6223067Z",
+  "runtime": {
+    "openCodeVersion": "1.18.4",
+    "provider": "openai",
+    "model": "openai/gpt-5.6-sol",
+    "variant": "high",
+    "safeChangeCommit": "eccd6273631a55f57ff1800711ca2c215f49b9ff"
+  },
+  "prediction": {
+    "findings": [
+      {
+        "file": "src/github-client.js",
+        "classification": "direct",
+        "evidence": "Synchronously requires node-fetch and depends on response.ok, status, and json(); node-fetch v3 is ESM-only."
+      },
+      {
+        "file": "package.json",
+        "classification": "direct",
+        "evidence": "Declares CommonJS and node-fetch v2; the dependency and runtime contract must be updated."
+      },
+      {
+        "file": "package-lock.json",
+        "classification": "direct",
+        "evidence": "Locks node-fetch 2.7.0 and must be regenerated for v3."
+      },
+      {
+        "file": "test/github-client.test.js",
+        "classification": "indirect",
+        "evidence": "Mocks node-fetch through CommonJS Module._load, which will not intercept an ESM dynamic import."
+      },
+      {
+        "file": "src/sync-releases.js",
+        "classification": "indirect",
+        "evidence": "Consumes the CommonJS fetchRelease export and depends on its Promise and parsed-response behavior."
+      },
+      {
+        "file": ".github/workflows/ci.yml",
+        "classification": "validation",
+        "evidence": "Pins Node 14 and runs clean installation and tests."
+      },
+      {
+        "file": "Dockerfile",
+        "classification": "validation",
+        "evidence": "Pins the production runtime to node:14-alpine and installs from the lockfile."
+      },
+      {
+        "file": "docs/github-integration.md",
+        "classification": "indirect",
+        "evidence": "Documents Node 14, CommonJS loading, and the non-2xx error contract."
+      }
+    ]
+  },
+  "score": {
+    "counts": {
+      "expected": 8,
+      "predicted": 8,
+      "truePositives": 8,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    },
+    "metrics": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "classificationAccuracy": 0.75,
+      "evidenceCoverage": 1,
+      "overall": 0.925
+    },
+    "missedFiles": [],
+    "unexpectedFiles": []
+  },
+  "privacy": {
+    "rawEventsCommitted": false,
+    "credentialsCommitted": false,
+    "sessionIdentifiersCommitted": false
+  }
+}
