@@ -1,5 +1,7 @@
 # OpenCode SafeChange
 
+[![CI](https://github.com/Apricooooot/opencode-safechange/actions/workflows/ci.yml/badge.svg)](https://github.com/Apricooooot/opencode-safechange/actions/workflows/ci.yml)
+
 A risk-aware multi-agent runtime for dependency upgrades, public API changes,
 schema migrations, and cross-module refactors.
 
@@ -17,7 +19,7 @@ lifecycle and permission-separated agents to answer four different questions:
 3. What is the smallest safe implementation?
 4. What evidence shows that it works?
 
-## Architecture
+## Architecture at a glance
 
 - `safechange`: primary agent and lifecycle orchestrator
 - `impact-analyzer`: read-only repository mapper and impact investigator
@@ -26,6 +28,89 @@ lifecycle and permission-separated agents to answer four different questions:
 - deterministic state machine with tests
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design.
+
+## How this maps to OpenCode
+
+SafeChange uses OpenCode's native runtime extension points instead of wrapping
+OpenCode in a separate orchestration service.
+
+```mermaid
+flowchart LR
+    C["opencode.json"] --> D["OpenCode discovery"]
+    A[".opencode/agents/*.md"] --> D
+    T[".opencode/tools/*.ts"] --> D
+    D --> P["safechange<br/>primary agent"]
+    P -->|"task tool"| I["impact-analyzer<br/>subagent"]
+    P -->|"task tool after approval"| V["implementer-verifier<br/>subagent"]
+    P -->|"custom tool"| R["safechange_report"]
+    R --> J[".safechange/report.json"]
+    S["runtime/state-machine.js"] -. "testable lifecycle contract" .-> P
+```
+
+### Discovery and configuration
+
+At startup, OpenCode reads [`opencode.json`](opencode.json), discovers Markdown
+agents from `.opencode/agents/`, and loads TypeScript tools from
+`.opencode/tools/`. The Markdown filename becomes the agent name. Setting
+`default_agent` to `safechange` makes the orchestrator the initial primary agent.
+
+SafeChange deliberately leaves the model unspecified. OpenCode therefore uses
+the user's configured provider and model rather than coupling this repository to
+one vendor.
+
+### Primary agent and subagent sessions
+
+`safechange` runs as a `primary` agent and owns user interaction and lifecycle
+decisions. The other two agents use `mode: subagent`. The primary agent invokes
+them through OpenCode's `task` tool, which creates child sessions with their own
+prompts, context windows, and permissions.
+
+Task access is allowlisted:
+
+```yaml
+permission:
+  task:
+    "*": deny
+    "impact-analyzer": allow
+    "implementer-verifier": allow
+```
+
+This prevents the orchestrator from delegating to arbitrary installed agents.
+The analyzer cannot recursively delegate because its own `task` permission is
+denied.
+
+### Permission boundaries
+
+OpenCode evaluates tool permissions per agent. SafeChange uses this as a
+capability boundary:
+
+| Capability | Primary | Analyzer | Implementer/verifier |
+| --- | --- | --- | --- |
+| Read, search, LSP | Allow | Allow | Allow |
+| Edit files | Ask | Deny | Allow |
+| Run shell commands | Ask | Read-only Git allowlist | Ask |
+| Invoke subagents | Bundled agents only | Deny | Deny |
+| External directories | Deny | Deny | Deny |
+
+These permissions reduce accidental authority, but they are not an operating
+system sandbox. Shell commands and implementation still require human review.
+
+### Custom tool execution
+
+[`safechange-report.ts`](.opencode/tools/safechange-report.ts) uses
+`@opencode-ai/plugin` to register a typed tool. OpenCode validates its arguments
+before execution and supplies runtime context such as `agent`, `sessionID`, and
+`worktree`. The tool writes a structured report inside the active worktree so an
+agent run can be audited or evaluated later.
+
+### Deterministic control layer
+
+Prompts describe policy, but important ordering constraints also exist as normal
+code in [`runtime/state-machine.js`](runtime/state-machine.js). The state machine
+rejects invalid transitions—for example, entering `APPLYING` before `PLANNED`—
+and is covered by deterministic unit tests. In version 0.1 it acts as an
+executable lifecycle contract; a future plugin can enforce the same transitions
+directly through OpenCode event hooks.
 
 ## Install
 
@@ -121,8 +206,8 @@ Version 0.1 is intentionally small:
 - machine-readable reports;
 - explicit lifecycle tests.
 
-Planned work includes additional language fixtures, report schema validation, a
-GitHub Actions integration, and cross-model evaluation results.
+Planned work includes additional language fixtures, report schema validation,
+runtime hook enforcement, and cross-model evaluation results.
 
 ## Safety
 
