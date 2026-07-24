@@ -1,0 +1,43 @@
+{
+  "id": "config-api-options-v1",
+  "fixture": "fixtures/config-api-v1",
+  "prompt": "Analyze changing parseConfig(path) to parseConfig({ path, env, defaults }) while supporting string callers for one compatibility window. Find every affected production file, indirect behavioral dependency, test, and documentation file. Produce a migration plan and validation commands. Do not edit files.",
+  "expectedImpact": [
+    {
+      "file": "src/config.js",
+      "classification": "direct",
+      "reason": "Declares and implements the public API."
+    },
+    {
+      "file": "src/server.js",
+      "classification": "direct",
+      "reason": "Calls parseConfig with a string path."
+    },
+    {
+      "file": "src/cli.js",
+      "classification": "direct",
+      "reason": "Calls parseConfig with the CLI path argument."
+    },
+    {
+      "file": "src/cache.js",
+      "classification": "indirect",
+      "reason": "Builds cache keys from the old path-only input."
+    },
+    {
+      "file": "test/config.test.js",
+      "classification": "validation",
+      "reason": "Asserts the old signature and needs compatibility coverage."
+    },
+    {
+      "file": "test/server.test.js",
+      "classification": "validation",
+      "reason": "Verifies the server integration that consumes parsed config."
+    },
+    {
+      "file": "docs/configuration.md",
+      "classification": "indirect",
+      "reason": "Documents the public path-only API."
+    }
+  ]
+}
+
