@@ -177,6 +177,18 @@ The evaluator reports precision, recall, F1, classification accuracy, evidence
 coverage, and a weighted overall score. See
 [`benchmark/README.md`](benchmark/README.md) for the protocol.
 
+For a real OpenCode run that cannot see the answer key:
+
+```powershell
+npm.cmd run benchmark:prepare
+powershell -ExecutionPolicy Bypass -File benchmark/run-opencode.ps1 `
+  -Model openai/gpt-5.6-sol -Variant high
+```
+
+The runner injects a benchmark-only structured prediction tool into the
+isolated worktree, saves raw events and reproducibility metadata, and
+automatically evaluates the submitted prediction.
+
 ## Lifecycle
 
 ```text

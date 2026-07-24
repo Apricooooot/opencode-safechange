@@ -11,8 +11,12 @@ permission:
     "*": deny
     "impact-analyzer": allow
     "implementer-verifier": allow
-  edit: ask
-  bash: ask
+  edit: deny
+  bash:
+    "git status*": allow
+    "git diff*": allow
+    "git ls-files*": allow
+    "*": deny
   safechange_report: allow
   external_directory: deny
 ---
@@ -49,4 +53,7 @@ Rules:
 - A passing build is not a substitute for relevant tests.
 - If verification fails, report the failure and the smallest next action. Do not
   loop indefinitely.
-
+- When the user supplies an explicit machine-readable output contract, follow it
+  exactly. Preserve any required start/end markers and place the requested
+  payload at the absolute end of the final response, after the human-readable
+  summary.
