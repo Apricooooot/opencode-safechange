@@ -1,7 +1,11 @@
 node_modules/
 .opencode/node_modules/
+.opencode/.gitignore
+.opencode/package-lock.json
+.npm-cache/
+.opencode-runtime/
+.benchmark-runs/
 .safechange/
 coverage/
 dist/
 .env
-
